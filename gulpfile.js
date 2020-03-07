@@ -1,18 +1,21 @@
-'use strict';
+var gulp            = require('gulp'),
+    watch           = require('gulp-watch'),
+    prefixer        = require('gulp-autoprefixer'),
+    uglify          = require('gulp-uglify'),
+    sass            = require('gulp-sass'),
+    //sourcemaps      = require('gulp-sourcemaps'),
+    rigger          = require('gulp-rigger'),
+    cssmin          = require('gulp-minify-css'),
+    imagemin        = require('gulp-imagemin'),
+    pngquant        = require('imagemin-pngquant'),
+    rimraf          = require('rimraf'),
+    browserSync     = require("browser-sync"),
+    notify          = require("gulp-notify"), // Водит ошибки при сборке Gulp в виде системных сообщений
+    ftp             = require('vinyl-ftp'), // Диплой на хостинг через FTP
+    rsync           = require('gulp-rsync'), // Диплой на хостинг через SSH
+    reload          = browserSync.reload;
 
-var gulp = require('gulp'),
-    watch = require('gulp-watch'),
-    prefixer = require('gulp-autoprefixer'),
-    uglify = require('gulp-uglify'),
-    sass = require('gulp-sass'),
-//    sourcemaps = require('gulp-sourcemaps'),
-    rigger = require('gulp-rigger'),
-    cssmin = require('gulp-minify-css'),
-    imagemin = require('gulp-imagemin'),
-    pngquant = require('imagemin-pngquant'),
-    rimraf = require('rimraf'),
-    browserSync = require("browser-sync"),
-    reload = browserSync.reload;
+
 
 var path = {
     build: {
@@ -25,7 +28,7 @@ var path = {
     src: {
         html: 'src/*.html',
         js: 'src/js/main.js',
-        style: 'src/style/main.scss',
+        style: 'src/style/*.scss',
         img: 'src/img/**/*.*',
         fonts: 'src/fonts/**/*.*'
     },
@@ -81,12 +84,12 @@ gulp.task('style:build', function (done) {
 //        .pipe(sourcemaps.init())
         .pipe(sass({
             includePaths: ['src/style/'],
-            outputStyle: 'compressed',
+            outputStyle: 'expanded',
 //            sourceMap: true,
             errLogToConsole: true
-        }))
+        })).on("error", notify.onError())
         .pipe(prefixer())
-        .pipe(cssmin())
+//        .pipe(cssmin())
 //        .pipe(sourcemaps.write())
         .pipe(gulp.dest(path.build.css))
         .pipe(reload({stream: true}));
@@ -112,6 +115,39 @@ gulp.task('fonts:build', function (done) {
     done();
 });
 
+gulp.task('deploy', () => {
+        var conn = ftp.create({
+                host:      'yousite.com',
+                user:      'ftp-user',
+                password:  'password',
+                parallel:  10,
+                log: gutil.log
+        });
+        var globs = [
+        'dist/**',
+        'dist/.htaccess',
+        ];
+        return gulp.src(globs, {buffer: false})
+        .pipe(conn.dest('/www/yousite.com/'));
+ //Документация: https://pinchukov.net/blog/vinyl-ftp.html
+});
+
+
+gulp.task('rsync', () => {
+        return gulp.src('dist/**')
+        .pipe(rsync({
+                root: 'dist/',
+                hostname: 'joker@psiline.ru',
+                destination: 'www/psiline.ru/',
+                // include: ['*.htaccess'], // Скрытые файлы, которые необходимо включить в деплой
+                recursive: true,
+                archive: true,
+                silent: false,
+                compress: true
+        }));
+        //Документация: https://pinchukov.net/blog/gulp-rsync.html
+});
+
 gulp.task('build', gulp.series(
     'html:build',
     'js:build',
@@ -120,26 +156,13 @@ gulp.task('build', gulp.series(
     'image:build'
 ));
 
-
 gulp.task('watch', function (done){
-    watch(path.watch.html, function(event, cb) {
-        gulp.start('html:build');
-    });
-    watch(path.watch.style, function(event, cb) {
-        gulp.start('style:build');
-    });
-    watch(path.watch.js, function(event, cb) {
-        gulp.start('js:build');
-    });
-    watch(path.watch.img, function(event, cb) {
-        gulp.start('image:build');
-    });
-    watch(path.watch.fonts, function(event, cb) {
-        gulp.start('fonts:build');
-    });
+    gulp.watch([path.watch.html], gulp.parallel('html:build'));
+    gulp.watch(path.watch.style, gulp.parallel('style:build'));
+    gulp.watch(path.watch.js, gulp.parallel('js:build'));
+    gulp.watch(path.watch.img, gulp.parallel('image:build'));
+    gulp.watch(path.watch.fonts, gulp.parallel('fonts:build'));
     done();
 });
 
 gulp.task('default', gulp.series('build', 'webserver', 'watch'));
-
-
