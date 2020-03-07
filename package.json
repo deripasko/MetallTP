@@ -1,10 +1,10 @@
 {
-  "name": "frontend-devil",
-  "version": "1.0.1",
+  "name": "MetallTP",
+  "version": "0.0.1",
   "description": "Devil boilerplate for html+js+css apps",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Insayt/frontend-devil"
+    "url": "https://github.com/deripasko/MetallTP"
   },
   "dependencies": {
     "browser-sync": "^2.2.3",

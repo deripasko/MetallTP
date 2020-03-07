@@ -1,9 +1,9 @@
 {
-  "name": "frontend-devil",
-  "version": "1.0.0",
-  "homepage": "https://github.com/Insayt/frontend-devil",
+  "name": "MetallTP",
+  "version": "0.0.1",
+  "homepage": "https://github.com/deripasko/MetallTP",
   "authors": [
-    "Alex Insayt <insait.rostov@ya.ru>"
+    "Alexey Deripasko <deripasko@gmail.com>"
   ],
   "description": "Devil boilerplate for html+js+css apps",
   "moduleType": [
@@ -11,7 +11,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "normalize.css": "*",
-    "jquery": "2.*"
+    "jquery": "^3.4.1",
+    "bootstrap": "^4.4.1"
   }
 }
