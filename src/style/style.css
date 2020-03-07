@@ -1,0 +1,11 @@
+#page-menu, #page-menu-wrap {
+    z-index: 200;
+    height: 60px;
+    line-height: 60px;
+}
+
+#page-menu, #page-menu-wrap {
+    position: relative;
+    height: 44px;
+    line-height: 44px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
