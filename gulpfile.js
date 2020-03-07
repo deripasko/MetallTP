@@ -5,7 +5,7 @@ var gulp = require('gulp'),
     prefixer = require('gulp-autoprefixer'),
     uglify = require('gulp-uglify'),
     sass = require('gulp-sass'),
-    sourcemaps = require('gulp-sourcemaps'),
+//    sourcemaps = require('gulp-sourcemaps'),
     rigger = require('gulp-rigger'),
     cssmin = require('gulp-minify-css'),
     imagemin = require('gulp-imagemin'),
@@ -43,55 +43,58 @@ var config = {
     server: {
         baseDir: "./build"
     },
-    tunnel: true,
-    host: 'localhost',
-    port: 9000,
-    logPrefix: "Frontend_Devil"
+    notify: false,
+    logPrefix: "MetallTP"
 };
 
-gulp.task('webserver', function () {
+gulp.task('webserver', function (done) {
     browserSync(config);
+    done();
 });
 
 gulp.task('clean', function (cb) {
     rimraf(path.clean, cb);
+    done();
 });
 
-gulp.task('html:build', function () {
-    gulp.src(path.src.html) 
+gulp.task('html:build', function (done) {
+    gulp.src(path.src.html)
         .pipe(rigger())
         .pipe(gulp.dest(path.build.html))
         .pipe(reload({stream: true}));
+    done();
 });
 
-gulp.task('js:build', function () {
-    gulp.src(path.src.js) 
-        .pipe(rigger()) 
-        .pipe(sourcemaps.init()) 
-        .pipe(uglify()) 
-        .pipe(sourcemaps.write()) 
+gulp.task('js:build', function (done) {
+    gulp.src(path.src.js)
+        .pipe(rigger())
+//        .pipe(sourcemaps.init())
+        .pipe(uglify())
+//        .pipe(sourcemaps.write())
         .pipe(gulp.dest(path.build.js))
         .pipe(reload({stream: true}));
+    done();
 });
 
-gulp.task('style:build', function () {
-    gulp.src(path.src.style) 
-        .pipe(sourcemaps.init())
+gulp.task('style:build', function (done) {
+    gulp.src(path.src.style)
+//        .pipe(sourcemaps.init())
         .pipe(sass({
             includePaths: ['src/style/'],
             outputStyle: 'compressed',
-            sourceMap: true,
+//            sourceMap: true,
             errLogToConsole: true
         }))
         .pipe(prefixer())
         .pipe(cssmin())
-        .pipe(sourcemaps.write())
+//        .pipe(sourcemaps.write())
         .pipe(gulp.dest(path.build.css))
         .pipe(reload({stream: true}));
+    done();
 });
 
-gulp.task('image:build', function () {
-    gulp.src(path.src.img) 
+gulp.task('image:build', function (done) {
+    gulp.src(path.src.img)
         .pipe(imagemin({
             progressive: true,
             svgoPlugins: [{removeViewBox: false}],
@@ -100,39 +103,43 @@ gulp.task('image:build', function () {
         }))
         .pipe(gulp.dest(path.build.img))
         .pipe(reload({stream: true}));
+    done();
 });
 
-gulp.task('fonts:build', function() {
+gulp.task('fonts:build', function (done) {
     gulp.src(path.src.fonts)
         .pipe(gulp.dest(path.build.fonts))
+    done();
 });
 
-gulp.task('build', [
+gulp.task('build', gulp.series(
     'html:build',
     'js:build',
     'style:build',
     'fonts:build',
     'image:build'
-]);
+));
 
 
-gulp.task('watch', function(){
-    watch([path.watch.html], function(event, cb) {
+gulp.task('watch', function (done){
+    watch(path.watch.html, function(event, cb) {
         gulp.start('html:build');
     });
-    watch([path.watch.style], function(event, cb) {
+    watch(path.watch.style, function(event, cb) {
         gulp.start('style:build');
     });
-    watch([path.watch.js], function(event, cb) {
+    watch(path.watch.js, function(event, cb) {
         gulp.start('js:build');
     });
-    watch([path.watch.img], function(event, cb) {
+    watch(path.watch.img, function(event, cb) {
         gulp.start('image:build');
     });
-    watch([path.watch.fonts], function(event, cb) {
+    watch(path.watch.fonts, function(event, cb) {
         gulp.start('fonts:build');
     });
+    done();
 });
 
+gulp.task('default', gulp.series('build', 'webserver', 'watch'));
 
-gulp.task('default', ['build', 'webserver', 'watch']);
+
