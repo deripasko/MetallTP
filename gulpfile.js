@@ -3,7 +3,7 @@ var gulp            = require('gulp'),
     prefixer        = require('gulp-autoprefixer'),
     uglify          = require('gulp-uglify'),
     sass            = require('gulp-sass'),
-    //sourcemaps      = require('gulp-sourcemaps'),
+    sourcemaps      = require('gulp-sourcemaps'),
     rigger          = require('gulp-rigger'),
     cssmin          = require('gulp-minify-css'),
     imagemin        = require('gulp-imagemin'),
@@ -71,9 +71,9 @@ gulp.task('html:build', function (done) {
 gulp.task('js:build', function (done) {
     gulp.src(path.src.js)
         .pipe(rigger())
-//        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.init())
         .pipe(uglify())
-//        .pipe(sourcemaps.write())
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest(path.build.js))
         .pipe(reload({stream: true}));
     done();
@@ -81,16 +81,16 @@ gulp.task('js:build', function (done) {
 
 gulp.task('style:build', function (done) {
     gulp.src(path.src.style)
-//        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.init())
         .pipe(sass({
             includePaths: ['src/style/'],
             outputStyle: 'expanded',
-//            sourceMap: true,
+            sourceMap: true,
             errLogToConsole: true
         })).on("error", notify.onError())
         .pipe(prefixer())
 //        .pipe(cssmin())
-//        .pipe(sourcemaps.write())
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest(path.build.css))
         .pipe(reload({stream: true}));
     done();
